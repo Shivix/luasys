@@ -22,6 +22,12 @@ App {
 }
 
 App {
+    name = "lus",
+    repo = "https://github.com/Shivix/lus.git",
+    branch = "master",
+}
+
+App {
     name = "lualib",
     repo = "https://github.com/Shivix/lualib.git",
     branch = "master",
