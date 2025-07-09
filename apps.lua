@@ -34,6 +34,13 @@ App {
 }
 
 App {
+    name = "dwm",
+    repo = "https://git.suckless.org/dwm",
+    branch = "master",
+    diff = "diffs/dwm.diff",
+}
+
+App {
     name = "sent",
     repo = "https://git.suckless.org/sent",
     branch = "master",

@@ -1,0 +1,101 @@
+diff --git a/config.def.h b/config.def.h
+index 9efa774..566b63c 100644
+--- a/config.def.h
++++ b/config.def.h
+@@ -5,21 +5,29 @@ static const unsigned int borderpx  = 1;        /* border pixel of windows */
+ static const unsigned int snap      = 32;       /* snap pixel */
+ static const int showbar            = 1;        /* 0 means no bar */
+ static const int topbar             = 1;        /* 0 means bottom bar */
+-static const char *fonts[]          = { "monospace:size=10" };
+-static const char dmenufont[]       = "monospace:size=10";
+-static const char col_gray1[]       = "#222222";
+-static const char col_gray2[]       = "#444444";
+-static const char col_gray3[]       = "#bbbbbb";
+-static const char col_gray4[]       = "#eeeeee";
+-static const char col_cyan[]        = "#005577";
++static const char *fonts[]          = { "Jetbrains Mono:size=14" };
++static const char dmenufont[]       = "Jetbrains Mono:size=14";
++//awful.spawn("dmenu_run -sf '#161616' -sb '#efe2c1' -fn 'Jetbrains Mono-15'")
++static const char bg_normal[]       = "#161616";
++static const char fg_normal[]       = "#bcaf8e";
++static const char bg_selected[]     = "#161616";
++static const char fg_selected[]     = "#E59400";
++static const char border_focused[]  = "#996900";
++/*
++theme.bg_urgent = "#E59400"
++theme.bg_minimize = "#444444db"
++theme.bg_systray = theme.bg_normal
++theme.fg_urgent = "#efe2c1"
++*/
+ static const char *colors[][3]      = {
+ 	/*               fg         bg         border   */
+-	[SchemeNorm] = { col_gray3, col_gray1, col_gray2 },
+-	[SchemeSel]  = { col_gray4, col_cyan,  col_cyan  },
++	[SchemeNorm] = { fg_normal, bg_normal, bg_normal },
++	[SchemeSel]  = { fg_selected, bg_selected,  border_focused  },
+ };
+ 
+ /* tagging */
+-static const char *tags[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
++//static const char *tags[] = { "░░", "░░", "░░", "░░", "░░", "░░", "░░", "░░", "░░" };
++static const char *tags[] = { "1", "2", "3", "4", "5", "6", "7", "8" };
+ 
+ static const Rule rules[] = {
+ 	/* xprop(1):
+@@ -45,7 +53,7 @@ static const Layout layouts[] = {
+ };
+ 
+ /* key definitions */
+-#define MODKEY Mod1Mask
++#define MODKEY Mod4Mask
+ #define TAGKEYS(KEY,TAG) \
+ 	{ MODKEY,                       KEY,      view,           {.ui = 1 << TAG} }, \
+ 	{ MODKEY|ControlMask,           KEY,      toggleview,     {.ui = 1 << TAG} }, \
+@@ -57,20 +65,20 @@ static const Layout layouts[] = {
+ 
+ /* commands */
+ static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
+-static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_cyan, "-sf", col_gray4, NULL };
+-static const char *termcmd[]  = { "st", NULL };
++static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", bg_normal, "-nf", fg_normal, "-sb", fg_selected, "-sf", bg_selected, NULL };
++static const char *termcmd[]  = { "alacritty", NULL };
+ 
+ static const Key keys[] = {
+ 	/* modifier                     key        function        argument */
+ 	{ MODKEY,                       XK_p,      spawn,          {.v = dmenucmd } },
+ 	{ MODKEY|ShiftMask,             XK_Return, spawn,          {.v = termcmd } },
+ 	{ MODKEY,                       XK_b,      togglebar,      {0} },
+-	{ MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
+-	{ MODKEY,                       XK_k,      focusstack,     {.i = -1 } },
++	{ MODKEY,                       XK_l,      focusstack,     {.i = +1 } },
++	{ MODKEY,                       XK_h,      focusstack,     {.i = -1 } },
+ 	{ MODKEY,                       XK_i,      incnmaster,     {.i = +1 } },
+ 	{ MODKEY,                       XK_d,      incnmaster,     {.i = -1 } },
+-	{ MODKEY,                       XK_h,      setmfact,       {.f = -0.05} },
+-	{ MODKEY,                       XK_l,      setmfact,       {.f = +0.05} },
++	{ MODKEY,                       XK_k,      setmfact,       {.f = -0.05} },
++	{ MODKEY,                       XK_j,      setmfact,       {.f = +0.05} },
+ 	{ MODKEY,                       XK_Return, zoom,           {0} },
+ 	{ MODKEY,                       XK_Tab,    view,           {0} },
+ 	{ MODKEY|ShiftMask,             XK_c,      killclient,     {0} },
+@@ -93,7 +101,6 @@ static const Key keys[] = {
+ 	TAGKEYS(                        XK_6,                      5)
+ 	TAGKEYS(                        XK_7,                      6)
+ 	TAGKEYS(                        XK_8,                      7)
+-	TAGKEYS(                        XK_9,                      8)
+ 	{ MODKEY|ShiftMask,             XK_q,      quit,           {0} },
+ };
+ 
+diff --git a/dwm.c b/dwm.c
+index 1443802..2829160 100644
+--- a/dwm.c
++++ b/dwm.c
+@@ -1067,6 +1067,8 @@ manage(Window w, XWindowAttributes *wa)
+ 	updatewindowtype(c);
+ 	updatesizehints(c);
+ 	updatewmhints(c);
++	c->x = c->mon->mx + (c->mon->mw - WIDTH(c)) / 2;
++	c->y = c->mon->my + (c->mon->mh - HEIGHT(c)) / 2;
+ 	XSelectInput(dpy, w, EnterWindowMask|FocusChangeMask|PropertyChangeMask|StructureNotifyMask);
+ 	grabbuttons(c, 0);
+ 	if (!c->isfloating)
