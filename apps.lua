@@ -10,7 +10,6 @@ end
 App {
     name = "neovim",
     repo = "https://github.com/neovim/neovim.git",
-    branch = "master",
     full_depth = true,
     make_args = "CMAKE_BUILD_TYPE=RelWithDebInfo",
 }
@@ -24,31 +23,32 @@ App {
 App {
     name = "lus",
     repo = "https://github.com/Shivix/lus.git",
-    branch = "master",
 }
 
 App {
     name = "lualib",
     repo = "https://github.com/Shivix/lualib.git",
-    branch = "master",
 }
 
 App {
     name = "dwm",
     repo = "https://git.suckless.org/dwm",
-    branch = "master",
     diff = "diffs/dwm.diff",
+}
+
+App {
+    name = "dmenu",
+    repo = "https://git.suckless.org/dmenu",
+    diff = "diffs/dmenu.diff",
 }
 
 App {
     name = "sent",
     repo = "https://git.suckless.org/sent",
-    branch = "master",
     diff = "diffs/sent.diff",
 }
 
 App {
     name = "farbfeld",
     repo = "https://git.suckless.org/farbfeld",
-    branch = "master",
 }
