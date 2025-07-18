@@ -23,7 +23,14 @@ function App(app)
     if app.diff then
         os.execute(string.format("git -C %q apply <%q ", dir, app.diff))
     end
-    local make_cmd = "sudo make install --directory " .. dir
+    if app.cargo then
+        os.execute(string.format("cargo install --path %q", dir))
+        if not app.make_target then
+            return
+        end
+    end
+
+    local make_cmd = string.format("sudo make %s --directory %q", app.make_target or "install", dir)
     if app.make_args then
         make_cmd = make_cmd .. " " .. app.make_args
     end

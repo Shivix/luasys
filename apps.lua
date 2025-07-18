@@ -52,3 +52,10 @@ App {
     name = "farbfeld",
     repo = "https://git.suckless.org/farbfeld",
 }
+
+App {
+    name = "prefix",
+    repo = "https://github.com/Shivix/prefix.git",
+    cargo = true,
+    make_target = "install-fish",
+}
