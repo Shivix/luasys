@@ -8,23 +8,21 @@ function App(app)
         depth = "--single-branch"
     end
     local branch = app.branch or "master"
-    local result = os.execute(
-        string.format(
-            "git clone --single-branch --branch %q %s %q %q",
-            branch,
-            depth,
-            app.repo,
-            dir
+    if os.execute("test -d " .. dir) then
+        assert(os.execute(string.format("git -C %q pull", dir)))
+    else
+        assert(
+            os.execute(
+                string.format("git clone --branch %q %s %q %q", branch, depth, app.repo, dir)
+            )
         )
-    )
-    if result == nil then
-        os.execute(string.format("git -C %q pull", dir))
     end
     if app.diff then
-        os.execute(string.format("git -C %q apply <%q ", dir, app.diff))
+        -- If we provide the filename as an arg, it will try to find the file relative to dir.
+        assert(os.execute(string.format("git -C %q apply <%q", dir, app.diff)))
     end
     if app.cargo then
-        os.execute(string.format("cargo install --path %q", dir))
+        assert(os.execute(string.format("cargo install --path %q", dir)))
         if not app.make_target then
             return
         end
@@ -34,7 +32,7 @@ function App(app)
     if app.make_args then
         make_cmd = make_cmd .. " " .. app.make_args
     end
-    os.execute(make_cmd)
+    assert(os.execute(make_cmd))
 end
 
 dofile("apps.lua")
