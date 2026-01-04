@@ -40,11 +40,23 @@ function App(app)
     end
     if app.zig then
         assert(os.execute(string.format("cd %q; zig build -Doptimize=ReleaseSafe", dir)))
-        assert(os.execute(string.format("cd %q; sudo mv -i zig-out/bin/* /usr/local/bin/", dir, app.name)))
+        assert(
+            os.execute(
+                string.format("cd %q; sudo mv -i zig-out/bin/* /usr/local/bin/", dir, app.name)
+            )
+        )
         return
     end
     if app.cmake then
-        assert(os.execute(string.format("mkdir %q/build; cd %q/build; cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local ..", dir, dir)))
+        assert(
+            os.execute(
+                string.format(
+                    "mkdir %q/build; cd %q/build; cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local ..",
+                    dir,
+                    dir
+                )
+            )
+        )
         assert(os.execute(string.format("cd %q/build; sudo make -j8 install", dir)))
         return
     end
