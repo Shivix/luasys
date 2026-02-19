@@ -67,6 +67,10 @@ function App(app)
         make_cmd = make_cmd .. " " .. app.make_args
     end
     assert(os.execute(make_cmd))
+
+    if app.extra then
+        assert(os.execute(app.extra))
+    end
 end
 
 dofile("apps.lua")

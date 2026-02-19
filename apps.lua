@@ -58,6 +58,7 @@ App {
 App {
     name = "lus",
     repo = "https://github.com/Shivix/lus.git",
+    extra = "make install-skill",
 }
 
 App {
