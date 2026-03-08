@@ -37,8 +37,9 @@ App {
                 string.format("tar -xJf %q %q/lib --strip-components=1", untar_dir, dir_name)
             )
         )
-        assert(os.execute("sudo mv -i zig /usr/local/bin/zig"))
-        assert(os.execute("sudo mv -i lib /usr/local/lib/zig"))
+        assert(os.execute("sudo mv zig /usr/local/bin/zig"))
+        assert(os.execute("sudo rm -rf /usr/local/lib/zig"))
+        assert(os.execute("sudo mv lib /usr/local/lib/zig"))
         assert(os.execute(string.format("rm %q", untar_dir)))
     end,
 }
@@ -53,12 +54,13 @@ App {
     name = "zua",
     repo = "https://github.com/Shivix/zua.lua.git",
     branch = "simple",
+    extra = "make install-completion",
 }
 
 App {
     name = "lus",
     repo = "https://github.com/Shivix/lus.git",
-    extra = "make install-skill",
+    extra = "make install-skill && make install-completion",
 }
 
 App {
@@ -93,5 +95,12 @@ App {
     name = "prefix",
     repo = "https://github.com/Shivix/prefix.git",
     cargo = true,
-    make_target = "install-fish",
+    extra = "make install-fish",
+}
+
+App {
+    name = "fp",
+    repo = "https://github.com/Shivix/fp.git",
+    zig = true,
+    extra = "make install-completion",
 }
