@@ -55,7 +55,7 @@ function App(app)
         assert(os.execute(string.format("cd %q/build; sudo make -j8 install", dir)))
     else
         local make_cmd =
-            string.format("sudo make -j8 %s --directory %q install", dir)
+            string.format("sudo make -j8 install --directory %q", dir)
         if app.make_args then
             make_cmd = make_cmd .. " " .. app.make_args
         end
