@@ -19,6 +19,7 @@ function App(app)
     end
     if app.repo then
         if os.execute("test -d " .. dir) then
+            assert(os.execute(string.format("git -C %q restore .", dir)))
             assert(os.execute(string.format("git -C %q pull", dir)))
         else
             assert(
@@ -30,11 +31,33 @@ function App(app)
     end
     if app.diff then
         -- If we provide the filename as an arg, it will try to find the file relative to dir.
-        assert(os.execute(string.format("git -C %q apply <%q", dir, app.diff)))
+        local apply_cmd = string.format("git -C %q apply --check <%q", dir, app.diff)
+        if os.execute(apply_cmd) then
+            assert(os.execute(string.format("git -C %q apply <%q", dir, app.diff)))
+        end
     end
 
     if app.cargo then
         assert(os.execute(string.format("cargo install --path %q", dir)))
+    elseif app.container ~= nil then
+        local container_name = "luasys-" .. app.name .. "-build"
+        local build_image = "luasys-void:latest"
+        local build_cmd = string.format(
+            "podman run --rm --name %q -v %q:/src -w /src --entrypoint /bin/sh %q -lc make",
+            container_name,
+            dir,
+            build_image
+        )
+
+        assert(os.execute("mkdir -p out"))
+        assert(os.execute(build_cmd))
+        for _, binary in ipairs(app.container.binaries) do
+            assert(os.execute(string.format("sudo cp %q/%q /usr/local/bin/", dir, binary)))
+        end
+        if app.container.manpage then
+            assert(os.execute("mkdir -p /usr/local/share/man/man1/"))
+            assert(os.execute(string.format("sudo cp %q/%q /usr/local/share/man/man1/", dir, app.container.manpage)))
+        end
     elseif app.zig then
         assert(os.execute(string.format("cd %q; zig build -Doptimize=ReleaseFast", dir)))
         assert(

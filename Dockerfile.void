@@ -1,0 +1,8 @@
+FROM ghcr.io/void-linux/void-musl:latest
+
+RUN xbps-install -Sy --yes \
+    base-devel \
+    git \
+    libX11-devel \
+    libXft-devel \
+    libXinerama-devel
