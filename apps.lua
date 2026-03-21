@@ -38,6 +38,7 @@ App {
             )
         )
         assert(os.execute("sudo mv zig /usr/local/bin/zig"))
+        assert(os.execute("sudo mkdir -p /usr/local/lib"))
         assert(os.execute("sudo rm -rf /usr/local/lib/zig"))
         assert(os.execute("sudo mv lib /usr/local/lib/zig"))
         assert(os.execute(string.format("rm %q", untar_dir)))
@@ -66,6 +67,8 @@ App {
 App {
     name = "lualib",
     repo = "https://github.com/Shivix/lualib.git",
+    -- Lua not searching in /usr/local by default.
+    make_args = "PREFIX=/usr"
 }
 
 App {
@@ -100,15 +103,10 @@ App {
 }
 
 App {
-    name = "farbfeld",
-    repo = "https://git.suckless.org/farbfeld",
-}
-
-App {
     name = "prefix",
     repo = "https://github.com/Shivix/prefix.git",
     cargo = true,
-    extra = "make install-fish && make install-man",
+    extra = "make install-fish && sudo make install-man",
 }
 
 App {
@@ -121,11 +119,12 @@ App {
 App {
     name = "luarocks",
     custom = function()
-        assert(os.execute("curl -O https://luarocks.org/releases/luarocks-3.13.0.tar.gz"))
-        assert(os.execute("tar zxpf luarocks-3.13.0.tar.gz"))
-        assert(os.execute("cd luarocks-3.13.0 && ./configure && make && sudo make install"))
-        assert(os.execute("rm luarocks-3.13.0.tar.gz"))
-        assert(os.execute("rm -rf luarocks-3.13.0"))
+        assert(os.execute("curl -fL -o luarocks_out.tar.gz https://luarocks.org/releases/luarocks-3.13.0.tar.gz"))
+        assert(os.execute("mkdir -p luarocks_out"))
+        assert(os.execute("tar zxpf luarocks_out.tar.gz --strip-components=1 -C luarocks_out"))
+        assert(os.execute("cd luarocks_out && ./configure && make && sudo make install"))
+        assert(os.execute("rm luarocks_out.tar.gz"))
+        assert(os.execute("rm -rf luarocks_out"))
     end,
 }
 
