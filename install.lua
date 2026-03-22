@@ -43,21 +43,22 @@ function App(app)
         local container_name = "luasys-" .. app.name .. "-build"
         local build_image = "luasys-void:latest"
         local build_cmd = string.format(
-            "podman run --rm --name %q -v %q:/src -w /src --entrypoint /bin/sh %q -lc make",
+            "podman run --rm --name %q -v %q:/src -v ./out:/out -w /src --entrypoint /bin/sh %q -lc %q",
             container_name,
             dir,
-            build_image
+            build_image,
+            "make && make install DESTDIR=/out PREFIX=/usr/local"
         )
 
         assert(os.execute("mkdir -p out"))
         assert(os.execute(build_cmd))
-        for _, binary in ipairs(app.container.binaries) do
-            assert(os.execute(string.format("sudo cp %q/%q /usr/local/bin/", dir, binary)))
-        end
-        if app.container.manpage then
-            assert(os.execute("mkdir -p /usr/local/share/man/man1/"))
-            assert(os.execute(string.format("sudo cp %q/%q /usr/local/share/man/man1/", dir, app.container.manpage)))
-        end
+
+        print("\27[91mThe following will be installed to /usr/local:\27[0m")
+        assert(os.execute("tree out/usr/local"))
+
+        assert(os.execute("sudo cp -r out/usr/local/* /usr/local/"))
+
+        assert(os.execute("rm -r out"))
     elseif app.zig then
         assert(os.execute(string.format("cd %q; zig build -Doptimize=ReleaseFast", dir)))
         assert(
