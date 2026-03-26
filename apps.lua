@@ -8,6 +8,8 @@ App = App
         func(app)
     end
 
+local build = require("luasys").build
+
 App {
     name = "neovim",
     repo = "https://github.com/neovim/neovim.git",
@@ -48,7 +50,7 @@ App {
 App {
     name = "zls",
     repo = "https://github.com/zigtools/zls.git",
-    zig = true,
+    build = build.zig,
 }
 
 App {
@@ -67,7 +69,7 @@ App {
 App {
     name = "lualib",
     repo = "https://github.com/Shivix/lualib.git",
-    -- Lua not searching in /usr/local by default.
+    -- TODO: use LUA_PATH; Lua not searching in /usr/local by default.
     make_args = "PREFIX=/usr"
 }
 
@@ -76,47 +78,41 @@ App {
     repo = "https://git.suckless.org/dwm",
     branch = "6.8",
     diff = "diffs/dwm.diff",
-    container = true,
+    build = build.container,
 }
 
 App {
     name = "dmenu",
     repo = "https://git.suckless.org/dmenu",
     diff = "diffs/dmenu.diff",
-    container = true,
+    build = build.container,
 }
 
 App {
     name = "sent",
     repo = "https://git.suckless.org/sent",
     diff = "diffs/sent.diff",
-    container = true,
+    build = build.container,
 }
 
 App {
     name = "prefix",
     repo = "https://github.com/Shivix/prefix.git",
-    cargo = true,
+    build = build.cargo,
     extra = "make install-fish && sudo make install-man",
 }
 
 App {
     name = "fp",
     repo = "https://github.com/Shivix/fp.git",
-    zig = true,
+    build = build.zig,
     extra = "make install-completion",
 }
 
 App {
     name = "luarocks",
-    custom = function()
-        assert(os.execute("curl -fL -o luarocks_out.tar.gz https://luarocks.org/releases/luarocks-3.13.0.tar.gz"))
-        assert(os.execute("mkdir -p luarocks_out"))
-        assert(os.execute("tar zxpf luarocks_out.tar.gz --strip-components=1 -C luarocks_out"))
-        assert(os.execute("cd luarocks_out && ./configure && make && sudo make install"))
-        assert(os.execute("rm luarocks_out.tar.gz"))
-        assert(os.execute("rm -rf luarocks_out"))
-    end,
+    curl = "https://luarocks.org/releases/luarocks-3.13.0.tar.gz",
+    configure = true,
 }
 
 App {

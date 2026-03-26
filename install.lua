@@ -1,3 +1,6 @@
+local luasys = require("luasys")
+local build = luasys.build
+
 local function prepare_repo_source(app, dir)
     local branch = app.branch or "master"
     local depth = "--depth=1"
@@ -22,6 +25,7 @@ local function prepare_curl_source(app, dir)
     local file = curl:read("*all")
     assert(os.execute(string.format("mkdir -p %q", dir)))
     assert(os.execute(string.format("tar xvf %q --strip-components=1 -C %q", file, dir)))
+    assert(os.execute(string.format("rm %q", file)))
 end
 
 function App(app)
@@ -53,9 +57,10 @@ function App(app)
         end
     end
 
-    if app.cargo then
+    if app.build == build.cargo then
         assert(os.execute(string.format("cargo install --path %q", dir)))
-    elseif app.container then
+    -- Only supports make.
+    elseif app.build == build.container then
         local container_name = "luasys-" .. app.name .. "-build"
         local build_image = "luasys-void:latest"
         local build_cmd = string.format(
@@ -75,31 +80,30 @@ function App(app)
         assert(os.execute("sudo cp -r out/usr/local/* /usr/local/"))
 
         assert(os.execute("rm -r out"))
-    elseif app.zig then
+    elseif app.build == build.zig then
         assert(os.execute(string.format("cd %q; zig build -Doptimize=ReleaseFast", dir)))
         assert(
             os.execute(
+                -- TODO: zig install? Non binaries?
                 string.format("cd %q; sudo mv -i zig-out/bin/* /usr/local/bin/", dir, app.name)
             )
         )
-    elseif app.cmake then
-        assert(
-            os.execute(
-                string.format(
-                    "mkdir %q/build; cd %q/build; cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local ..",
-                    dir,
-                    dir
-                )
-            )
-        )
-        assert(os.execute(string.format("cd %q/build; sudo make -j8 install", dir)))
-    else
+    elseif app.build == build.luarocks then
+        -- TODO: Could use --tree for a distdir thing on container.
+        -- TODO: luarocks --lua-version=5.5 --tree=/usr/local install app.name
+    elseif app.build == build.make or app.build == nil then
+        -- TODO: CD into dir
+        if app.configure then
+            assert(os.execute(string.format("%q/configure", dir)))
+        end
         local make_cmd =
             string.format("sudo make -j8 install --directory %q", dir)
         if app.make_args then
             make_cmd = make_cmd .. " " .. app.make_args
         end
         assert(os.execute(make_cmd))
+    else
+        error("invalid build type: ", app.build)
     end
 
     if app.extra then
