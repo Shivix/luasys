@@ -76,30 +76,21 @@ App {
     repo = "https://git.suckless.org/dwm",
     branch = "6.8",
     diff = "diffs/dwm.diff",
-    container = {
-        binaries = {"dwm"},
-        manpage = "dwm.1",
-    }
+    container = true,
 }
 
 App {
     name = "dmenu",
     repo = "https://git.suckless.org/dmenu",
     diff = "diffs/dmenu.diff",
-    container = {
-        binaries = {"dmenu", "dmenu_run", "dmenu_path"},
-        manpage = "dmenu.1",
-    }
+    container = true,
 }
 
 App {
     name = "sent",
     repo = "https://git.suckless.org/sent",
     diff = "diffs/sent.diff",
-    container = {
-        binaries = {"sent"},
-        manpage = "sent.1",
-    }
+    container = true,
 }
 
 App {

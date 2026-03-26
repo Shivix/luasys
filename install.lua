@@ -1,3 +1,29 @@
+local function prepare_repo_source(app, dir)
+    local branch = app.branch or "master"
+    local depth = "--depth=1"
+    if app.full_depth then
+        depth = "--single-branch"
+    end
+    if os.execute("test -d " .. dir) then
+        assert(os.execute(string.format("git -C %q restore .", dir)))
+        assert(os.execute(string.format("git -C %q pull", dir)))
+    else
+        assert(
+            os.execute(
+                string.format("git clone --branch %q %s %q %q", branch, depth, app.repo, dir)
+            )
+        )
+    end
+end
+
+local function prepare_curl_source(app, dir)
+    -- TODO: Consider a custom execute command with extra logging? builtin format? lualib?
+    local curl = assert(io.popen(string.format("curl -fLO -w '%%{filename_effective}' %q", app.curl)))
+    local file = curl:read("*all")
+    assert(os.execute(string.format("mkdir -p %q", dir)))
+    assert(os.execute(string.format("tar xvf %q --strip-components=1 -C %q", file, dir)))
+end
+
 function App(app)
     if arg[1] and app.name ~= arg[1] then
         return
@@ -12,24 +38,14 @@ function App(app)
     -- Allow specifying a non temporary path. Useful for things that take a long time to build but support incremental/ cached builds.
     local dir = app.path or ("/tmp/luasys_install_" .. app.name)
     dir = dir:gsub("^~", assert(os.getenv("HOME")))
-    local branch = app.branch or "master"
-    local depth = "--depth=1"
-    if app.full_depth then
-        depth = "--single-branch"
-    end
     if app.repo then
-        if os.execute("test -d " .. dir) then
-            assert(os.execute(string.format("git -C %q restore .", dir)))
-            assert(os.execute(string.format("git -C %q pull", dir)))
-        else
-            assert(
-                os.execute(
-                    string.format("git clone --branch %q %s %q %q", branch, depth, app.repo, dir)
-                )
-            )
-        end
+        prepare_repo_source(app, dir)
+    end
+    if app.curl then
+        prepare_curl_source(app, dir)
     end
     if app.diff then
+        -- git apply works outside of git repos.
         -- If we provide the filename as an arg, it will try to find the file relative to dir.
         local apply_cmd = string.format("git -C %q apply --check <%q", dir, app.diff)
         if os.execute(apply_cmd) then
@@ -39,7 +55,7 @@ function App(app)
 
     if app.cargo then
         assert(os.execute(string.format("cargo install --path %q", dir)))
-    elseif app.container ~= nil then
+    elseif app.container then
         local container_name = "luasys-" .. app.name .. "-build"
         local build_image = "luasys-void:latest"
         local build_cmd = string.format(
