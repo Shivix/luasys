@@ -110,9 +110,19 @@ App {
 }
 
 App {
+    name = "lua",
+    curl = "https://www.lua.org/ftp/lua-5.5.0.tar.gz",
+}
+
+App {
     name = "luarocks",
     curl = "https://luarocks.org/releases/luarocks-3.13.0.tar.gz",
     configure = true,
+}
+
+App {
+    name = "luaposix",
+    luarocks = true, -- TODO: Maybe have like build "lua|zig|make" etc?
 }
 
 App {

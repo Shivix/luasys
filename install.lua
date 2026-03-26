@@ -90,7 +90,7 @@ function App(app)
         )
     elseif app.build == build.luarocks then
         -- TODO: Could use --tree for a distdir thing on container.
-        -- TODO: luarocks --lua-version=5.5 --tree=/usr/local install app.name
+        assert(os.execute(string.format("luarocks --lua-version=5.5 --tree=/usr/local install %q", app.name)))
     elseif app.build == build.make or app.build == nil then
         -- TODO: CD into dir
         if app.configure then
