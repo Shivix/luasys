@@ -20,6 +20,9 @@ local function prepare_repo_source(app, dir)
 end
 
 local function prepare_curl_source(app, dir)
+    if os.execute("test -d " .. dir) then
+        return
+    end
     -- TODO: Consider a custom execute command with extra logging? builtin format? lualib?
     local curl = assert(io.popen(string.format("curl -fLO -w '%%{filename_effective}' %q", app.curl)))
     local file = curl:read("*all")
@@ -33,12 +36,6 @@ function App(app)
         return
     end
 
-    -- Consider passing in helpful values, e.g. temp file name
-    if app.custom then
-        app.custom()
-        return
-    end
-
     -- Allow specifying a non temporary path. Useful for things that take a long time to build but support incremental/ cached builds.
     local dir = app.path or ("/tmp/luasys_install_" .. app.name)
     dir = dir:gsub("^~", assert(os.getenv("HOME")))
@@ -48,6 +45,13 @@ function App(app)
     if app.curl then
         prepare_curl_source(app, dir)
     end
+
+    -- Consider passing in helpful values, e.g. temp file name
+    if app.custom then
+        app.custom()
+        return
+    end
+
     if app.diff then
         -- git apply works outside of git repos.
         -- If we provide the filename as an arg, it will try to find the file relative to dir.
@@ -55,6 +59,10 @@ function App(app)
         if os.execute(apply_cmd) then
             assert(os.execute(string.format("git -C %q apply <%q", dir, app.diff)))
         end
+    end
+
+    if app.before then
+        assert(os.execute(string.format("cd %q; " .. app.before, dir)))
     end
 
     if app.build == build.cargo then
@@ -90,7 +98,7 @@ function App(app)
         )
     elseif app.build == build.luarocks then
         -- TODO: Could use --tree for a distdir thing on container.
-        assert(os.execute(string.format("luarocks --lua-version=5.5 --tree=/usr/local install %q", app.name)))
+        assert(os.execute(string.format("sudo luarocks --lua-version=5.5 --tree=/usr/local install %q", app.name)))
     elseif app.build == build.make or app.build == nil then
         -- TODO: CD into dir
         if app.configure then
@@ -106,8 +114,8 @@ function App(app)
         error("invalid build type: ", app.build)
     end
 
-    if app.extra then
-        assert(os.execute(string.format("cd %q; " .. app.extra, dir)))
+    if app.after then
+        assert(os.execute(string.format("cd %q; " .. app.after, dir)))
     end
 end
 

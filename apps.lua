@@ -57,13 +57,13 @@ App {
     name = "zua",
     repo = "https://github.com/Shivix/zua.lua.git",
     branch = "simple",
-    extra = "make install-completion",
+    after = "make install-completion",
 }
 
 App {
     name = "lus",
     repo = "https://github.com/Shivix/lus.git",
-    extra = "make install-skill && make install-completion",
+    after = "make install-skill && make install-completion",
 }
 
 App {
@@ -99,20 +99,23 @@ App {
     name = "prefix",
     repo = "https://github.com/Shivix/prefix.git",
     build = build.cargo,
-    extra = "make install-fish && sudo make install-man",
+    after = "make install-fish && sudo make install-man",
 }
 
 App {
     name = "fp",
     repo = "https://github.com/Shivix/fp.git",
     build = build.zig,
-    extra = "make install-completion",
+    after = "make install-completion",
 }
 
-App {
-    name = "lua",
-    curl = "https://www.lua.org/ftp/lua-5.5.0.tar.gz",
-}
+--App {
+--    name = "lua",
+--    curl = "https://www.lua.org/ftp/lua-5.5.0.tar.gz",
+--    -- Lua makefile doesn't build when running install target
+--    before = "make",
+--    after = '[ "$(command -v lua)" = "/usr/local/bin/lua" ] || { echo "\\033[31mluasys lua not first in path\\033[0m"; exit 1; }',
+--}
 
 App {
     name = "luarocks",
@@ -120,10 +123,10 @@ App {
     configure = true,
 }
 
-App {
-    name = "luaposix",
-    luarocks = true, -- TODO: Maybe have like build "lua|zig|make" etc?
-}
+--App {
+--    name = "luaposix",
+--    build = build.luarocks,
+--}
 
 App {
     name = "codex",
